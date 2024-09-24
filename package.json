@@ -1,0 +1,44 @@
+{
+  "name": "sawala-blog",
+  "version": "1.0.0",
+  "description": "Blog wisata, projek sawala ke-2",
+  "main": "dist/server.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-typescript": "^7.24.7",
+    "@eslint/js": "^9.11.0",
+    "@jest/globals": "^29.7.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.13",
+    "babel-jest": "^29.7.0",
+    "concurrently": "^9.0.1",
+    "eslint": "^9.11.0",
+    "globals": "^15.9.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "prisma": "^5.19.1",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.6.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "scripts": {
+    "start": "node dist/src/server.js",
+    "build": "tsc",
+    "dev": "concurrently \"tsc -w\" \"nodemon dist/src/server.js\"",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  }
+}
