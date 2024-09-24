@@ -1,6 +1,15 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import authRoutes from "./routes/auth-route";
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
-app.listen(5000, () => console.log(`Server running 5000`));
+app.use("/api", authRoutes);
+
+app.use((req: Request, res: Response) => {
+    res.status(404).json({
+        message: `request ${req.method} ${req.originalUrl} not found`,
+    });
+});
+
+export default app;
