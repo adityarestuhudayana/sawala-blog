@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express';
 import authRoutes from "./routes/auth-route";
+import dotenv from 'dotenv';
 
-export const app = express();
+const app = express();
+dotenv.config();
 app.use(express.json());
 
 app.use("/api", authRoutes);
