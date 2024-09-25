@@ -14,7 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env: 
-      DATABASE_URL: ${{ secrets.DATABASE_URL }} 
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
 
     steps:
       - name: Checkout code
