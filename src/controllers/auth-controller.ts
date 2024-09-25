@@ -83,3 +83,30 @@ export const login = async (req: Request, res: Response) => {
         }
     }
 }
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(400).json({ message: "No token found" });
+        }
+
+        // Verify the token
+        try {
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
+        } catch (err) {
+            // If token is invalid, clear it anyway but inform the client
+            res.clearCookie("token", {
+                httpOnly: true,
+                sameSite: "strict",
+                secure: process.env.NODE_ENV === "production"
+            });
+            return res.status(401).json({ message: "Invalid token, cleared cookie" });
+        }
+
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({ message: "Internal server error during logout" });
+    }
+};

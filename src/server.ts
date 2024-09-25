@@ -1,9 +1,11 @@
 import express, { Request, Response } from 'express';
 import authRoutes from "./routes/auth-route";
 import dotenv from 'dotenv';
+import cookieParser from "cookie-parser";
 
 const app = express();
 dotenv.config();
+app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api", authRoutes);
