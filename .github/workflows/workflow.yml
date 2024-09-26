@@ -44,7 +44,7 @@ jobs:
 
       # Migrate Prisma
       - name: Migrate Prisma
-        run: yarn prisma migrate deploy
+        run: yarn vercel-build
 
       # Run Tests
       - name: Run Jest Tests
