@@ -3,6 +3,7 @@ import { LoginRequest, RegisterRequest, UserRequest } from "../types/user";
 import { prisma } from "../config/database";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import cloudinary from "../services/cloudinary";
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -109,6 +110,49 @@ export const logout = async (req: Request, res: Response) => {
     }
 };
 
+export const updateProfile = async (req: UserRequest, res: Response) => {
+    try {
+        const user = req.user;
+        const request: RegisterRequest = req.body;
+
+        const existsUser = await prisma.user.findUnique({ where: { id: user!.id } });
+
+        let cloudinaryResponse = null;
+
+        if (request.profilePicture) {
+            if (existsUser?.profilePicturePublicId) {
+                await cloudinary.uploader.destroy(existsUser.profilePicturePublicId);
+            }
+
+            cloudinaryResponse = await cloudinary.uploader.upload(request.profilePicture, { folder: "products" });
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: user!.id },
+            data: {
+                ...request,
+                profilePicture: cloudinaryResponse?.secure_url || existsUser?.profilePicture, // Gunakan gambar lama jika tidak ada yang baru
+                profilePicturePublicId: cloudinaryResponse?.public_id || existsUser?.profilePicturePublicId, // Gunakan public_id lama jika tidak ada yang baru
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true
+            }
+        });
+
+        res.json(updatedUser);
+    } catch (error) {
+        if (error instanceof Error) {
+            console.log(req.user)
+            console.log(error)
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
 export const getUser = async (req: UserRequest, res: Response) => {
     try {
         if (!req.user) {
@@ -119,14 +163,13 @@ export const getUser = async (req: UserRequest, res: Response) => {
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: {
+                      select: {
                 id: true,
                 name: true,
                 email: true,
                 profilePicture: true
-            }
-        });
-
+           })
+          
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }

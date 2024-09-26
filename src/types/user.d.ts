@@ -1,8 +1,10 @@
 import { Request } from "express";
+
 export type RegisterRequest = {
     name: string;
     email: string;
-    password: string
+    password: string;
+    profilePicture?: string;
 };
 
 export type LoginRequest = {
