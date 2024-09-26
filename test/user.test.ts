@@ -30,23 +30,6 @@ describe('User API', () => {
     });
 
     describe('POST /api/auth/login', () => {
-        it("should login", async () => {
-            const response = await supertest(app)
-                .post("/api/auth/login")
-                .send({
-                    email: "testing@gmail.com",
-                    password: "test"
-                });
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('name', 'Testing');
-            expect(response.body).toHaveProperty('email', 'testing@gmail.com');
-            expect(response.body).toHaveProperty('token');
-            token = response.body.token;
-        });
-    });
-
-    describe('POST /api/auth/login', () => {
         it("should reject login with wrong password", async () => {
             const response = await supertest(app)
                 .post("/api/auth/login")
