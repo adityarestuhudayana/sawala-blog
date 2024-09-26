@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals"
+import { describe } from "@jest/globals";
 import app from "../src/server";
 import supertest from "supertest";
 import { prisma } from "../src/config/database";
@@ -12,6 +12,7 @@ function imageToBase64(filePath: string) {
 
 describe('User API', () => {
     let token: string;
+
     let newProfilePicture = imageToBase64("./test/test-image.png");
     let testEmail = "testing@gmail.com"
 
@@ -46,7 +47,20 @@ describe('User API', () => {
             expect(response.body).toHaveProperty('name', 'Testing');
             expect(response.body).toHaveProperty('email', 'testing@gmail.com');
             expect(response.body).toHaveProperty('token');
-            token = response.body.token; 
+            token = response.body.token;
+        });
+    });
+
+    describe('GET /api/users/me', () => {
+        it('should return user data for authenticated user', async () => {
+            const response = await supertest(app)
+                .get('/api/users/me')
+                .set('Authorization', `Bearer ${token}`); // Use Authorization header
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('id');
+            expect(response.body).toHaveProperty('name', 'Testing');
+            expect(response.body).toHaveProperty('email', 'testing@gmail.com');
         });
     });
 

@@ -13,5 +13,10 @@ export type LoginRequest = {
 };
 
 export interface UserRequest extends Request {
-    user?: { id: number, name: string, email: string, profilePicture?: string }
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+        profilePicture?: string
+    };
 }

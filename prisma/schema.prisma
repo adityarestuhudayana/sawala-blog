@@ -20,6 +20,7 @@ model User {
   password String @db.VarChar(100)
   profilePicture String? @db.Text
   profilePicturePublicId String? @db.Text
+
   favourites Post[] @relation("UserFavourites")
   posts Post[]
 
