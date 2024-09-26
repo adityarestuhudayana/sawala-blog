@@ -47,6 +47,7 @@ describe('User API', () => {
             expect(response.body).toHaveProperty('name', 'Testing');
             expect(response.body).toHaveProperty('email', 'testing@gmail.com');
             expect(response.body).toHaveProperty('token');
+            token = response.body.token;
         });
     });
 
