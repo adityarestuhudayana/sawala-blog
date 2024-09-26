@@ -91,11 +91,9 @@ export const logout = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "No token found" });
         }
 
-        // Verify the token
         try {
             jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
-        } catch (err) {
-            // If token is invalid, clear it anyway but inform the client
+        } catch {
             res.clearCookie("token", {
                 httpOnly: true,
                 sameSite: "strict",
