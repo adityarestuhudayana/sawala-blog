@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { LoginRequest, RegisterRequest } from "../types/user";
+import { LoginRequest, RegisterRequest, UserRequest } from "../types/user";
 import { prisma } from "../config/database";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -106,5 +106,34 @@ export const logout = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Logout error:", error);
         res.status(500).json({ message: "Internal server error during logout" });
+    }
+};
+
+export const getUser = async (req: UserRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const userId = req.user.id;
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error("Error in getUser controller:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
