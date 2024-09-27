@@ -169,3 +169,29 @@ export const likePost = async (req: UserRequest, res: Response) => {
         res.status(500).json({message: "Internal server error"});
     }
 }
+
+export const getPopular = async (req: UserRequest, res: Response) => {
+    try {
+        const posts = await prisma.post.findMany({
+            orderBy: [
+                { visited: "desc" },
+                {
+                    favouritedBy: {
+                        _count: "desc"
+                    }
+                }
+            ],
+            include: {
+                user: true
+            }
+        });
+
+        res.json({data: posts});
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}

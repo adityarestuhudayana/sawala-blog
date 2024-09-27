@@ -208,6 +208,23 @@ describe('API Test', () => {
         });
     });
 
+    describe('GET /api/posts/popular', () => {
+        it('should get popular post', async () => {
+            const response = await supertest(app)
+                .get(`/api/posts/popular`)
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data[0]).toHaveProperty('name');
+            expect(response.body.data[0]).toHaveProperty('description');
+            expect(response.body.data[0]).toHaveProperty('image');
+            expect(response.body.data[0]).toHaveProperty('created_at');
+            expect(response.body.data[0]).toHaveProperty('user');
+            expect(response.body.data[0].user).toHaveProperty('profilePicture');
+        });
+    });
+
     describe('POST /api/auth/logout', () => {
         it("should logout the user", async () => {
             const response = await supertest(app)
