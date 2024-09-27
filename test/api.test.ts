@@ -129,6 +129,32 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('updated_at');
         }, 10000);
     });
+  
+    describe('GET /api/posts/newest', () => {
+        it("should return newest posts", async () => {
+            const response = await supertest(app)
+                .get("/api/posts/newest")
+                .set('Authorization', `Bearer ${token}`);
+    
+            expect(response.status).toBe(200);
+            expect(response.body).toBeInstanceOf(Array);
+            expect(response.body.length).toBeGreaterThan(0);
+    
+            response.body.forEach((post: any) => {
+                expect(post).toHaveProperty('id');
+                expect(post).toHaveProperty('name');
+                expect(post).toHaveProperty('location');
+                expect(post).toHaveProperty('description');
+                expect(post).toHaveProperty('image');
+                expect(post).toHaveProperty('created_at');
+                expect(post).toHaveProperty('updated_at');
+                expect(post).toHaveProperty('user');
+                expect(post.user).toHaveProperty('name');
+                expect(post.user).toHaveProperty('email');
+                expect(post.user).toHaveProperty('profilePicture');
+            });
+        });
+    });
 
     describe('GET /api/posts/recommendation', () => {
         it("should get posts data random", async () => {
@@ -156,5 +182,3 @@ describe('API Test', () => {
         });
     });
 });
-
-
