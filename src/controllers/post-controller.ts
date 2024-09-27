@@ -195,3 +195,29 @@ export const getPopular = async (req: UserRequest, res: Response) => {
         }
     }
 }
+  
+export const deletePost = async (req: UserRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const postId = parseInt(req.params.id)
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        })
+
+        if (!post) {
+            res.status(404).json({ message: "Post not found" })
+        }
+
+        await prisma.post.delete({
+            where: { id: postId }
+        })
+        res.status(200).json({ message: "Post deleted successfully" })
+
+    } catch (error) {
+        if (error instanceof Error) return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
