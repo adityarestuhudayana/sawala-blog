@@ -3,6 +3,7 @@ import { CreatePostRequest } from "../types/post";
 import { UserRequest } from "../types/user";
 import { prisma } from "../config/database";
 import cloudinary from "../services/cloudinary";
+import { Prisma } from "@prisma/client";
 
 export const create = async (req: UserRequest, res: Response) => {
     try {
@@ -99,6 +100,102 @@ export const getRecommendation = async (req: Request, res: Response) => {
     }
 }
 
+export const findOne = async (req: Request, res: Response) => {
+    try {
+        const postId: number = parseInt(req.params.postId);
+
+        const post = await prisma.post.findFirst({
+            where: {
+                id: postId,
+            },
+            include: {
+                user: true,
+                favouritedBy: true
+            }
+        });
+
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        res.json({
+            id: post.id,
+            name: post.name,
+            description: post.description,
+            image: post.image,
+            likes: post.favouritedBy.length,
+            created_at: post.created_at,
+            user: post.user,
+        });
+    } catch (error) {
+        if (error instanceof Error) return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const likePost = async (req: UserRequest, res: Response) => {
+    try {
+        const postId: number = parseInt(req.params.postId);
+        const userId: number = req.user!.id;
+
+        const updatedPost = await prisma.post.update({
+            where: {
+                id: postId,
+            },
+            data: {
+                favouritedBy: {
+                    connect: { id: userId },
+                },
+            },
+            include: {
+                user: true,
+                favouritedBy: true,
+            }
+        });
+
+        const response = {
+            id: updatedPost.id,
+            name: updatedPost.name,
+            description: updatedPost.description,
+            image: updatedPost.image,
+            likes: updatedPost.favouritedBy.length,
+            created_at: updatedPost.created_at,
+            user: updatedPost.user,
+        };
+
+        res.json(response);
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        res.status(500).json({message: "Internal server error"});
+    }
+}
+
+export const getPopular = async (req: UserRequest, res: Response) => {
+    try {
+        const posts = await prisma.post.findMany({
+            orderBy: [
+                { visited: "desc" },
+                {
+                    favouritedBy: {
+                        _count: "desc"
+                    }
+                }
+            ],
+            include: {
+                user: true
+            }
+        });
+
+        res.json({data: posts});
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
+  
 export const deletePost = async (req: UserRequest, res: Response) => {
     try {
         if (!req.user) {
