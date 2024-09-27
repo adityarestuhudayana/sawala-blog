@@ -129,6 +129,22 @@ describe('API Test', () => {
         }, 10000);
     });
 
+    describe('GET /api/posts/recommendation', () => {
+        it("should get posts data random", async () => {
+            const response = await supertest(app)
+                .get("/api/posts/recommendation")
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data[0]).toHaveProperty('id');
+            expect(response.body.data[0]).toHaveProperty('name');
+            expect(response.body.data[0]).toHaveProperty('image');
+            expect(response.body.data[0]).toHaveProperty('user');
+            expect(response.body.data[0].user).toHaveProperty('profilePicture');
+        });
+    });
+
     describe('POST /api/auth/logout', () => {
         it("should logout the user", async () => {
             const response = await supertest(app)
