@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { CreatePostRequest } from "../types/post";
 import { UserRequest } from "../types/user";
 import { prisma } from "../config/database";
@@ -27,5 +27,46 @@ export const create = async (req: UserRequest, res: Response) => {
         } else {
             return res.status(500).json({ message: "Internal server error" });
         }
+    }
+}
+
+export const getRecommendation = async (req: Request, res: Response) => {
+    try {
+        const postsCount = await prisma.post.count();
+
+        if (postsCount === 0) {
+            return res.status(404).json({ message: "there is no data posts" });
+        }
+
+        const skip = Math.floor(Math.random() * postsCount);
+        let take = 5;
+
+        if (postsCount - skip < take) {
+            take = postsCount - skip;
+        }
+
+        const posts = await prisma.post.findMany({
+            take,
+            skip,
+            orderBy: {
+                created_at: "desc",
+            },
+            select: {
+                id: true,
+                name: true,
+                image: true,
+                user: {
+                    select: {
+                        name: true,
+                        profilePicture: true
+                    }
+                }
+            }
+        });
+
+        res.json({ data: posts });
+    } catch (error) {
+        if (error instanceof Error) return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Internal server error" });
     }
 }
