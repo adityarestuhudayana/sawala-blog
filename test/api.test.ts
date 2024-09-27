@@ -10,11 +10,18 @@ function imageToBase64(filePath: string) {
     return `data:image/jpeg;base64,${base64Image}`; // Menambahkan prefix data URI
 }
 
-describe('User API', () => {
+describe('API Test', () => {
     let token: string;
 
+    let testUserId: number;
     let newProfilePicture = imageToBase64("./test/test-image.png");
     let testEmail = "testing@gmail.com"
+
+    let name = "test";
+    let location = "test";
+    let description = "test";
+    let newPostImage = imageToBase64("./test/test-image.png");
+    let postId: number;
 
     beforeAll(async () => {
         await supertest(app)
@@ -26,10 +33,12 @@ describe('User API', () => {
             });
     });
 
-    // Menghapus pengguna setelah semua tes selesai
     afterAll(async () => {
-        await prisma.user.deleteMany({
-            where: { email: testEmail }
+        await prisma.post.deleteMany({
+            where: { user_id: testUserId },
+        });
+        await prisma.user.delete({
+            where: { id: testUserId },
         });
         await prisma.$disconnect();
     });
@@ -44,10 +53,11 @@ describe('User API', () => {
                 });
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('name', 'Testing');
+            expect(response.body).toHaveProperty('name');
             expect(response.body).toHaveProperty('email', 'testing@gmail.com');
             expect(response.body).toHaveProperty('token');
             token = response.body.token;
+            testUserId = response.body.id;
         });
     });
 
@@ -59,7 +69,7 @@ describe('User API', () => {
 
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('name', 'Testing');
+            expect(response.body).toHaveProperty('name');
             expect(response.body).toHaveProperty('email', 'testing@gmail.com');
         });
     });
@@ -95,6 +105,30 @@ describe('User API', () => {
         }, 20000);
     });
 
+    describe('POST /api/posts', () => {
+        it("should create new post", async () => {
+            const response = await supertest(app)
+                .post("/api/posts")
+                .send({
+                    name,
+                    location,
+                    description,
+                    image: newPostImage
+                })
+                .set('Authorization', `Bearer ${token}`);
+
+            postId = response.body.id;
+            expect(response.status).toBe(201);
+            expect(response.body).toHaveProperty('id');
+            expect(response.body).toHaveProperty('name', name);
+            expect(response.body).toHaveProperty('location', location);
+            expect(response.body).toHaveProperty('description', description);
+            expect(response.body).toHaveProperty('image');
+            expect(response.body).toHaveProperty('created_at');
+            expect(response.body).toHaveProperty('updated_at');
+        }, 10000);
+    });
+
     describe('POST /api/auth/logout', () => {
         it("should logout the user", async () => {
             const response = await supertest(app)
@@ -105,3 +139,5 @@ describe('User API', () => {
         });
     });
 });
+
+
