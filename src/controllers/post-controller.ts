@@ -29,3 +29,31 @@ export const create = async (req: UserRequest, res: Response) => {
         }
     }
 }
+
+export const getNewest = async (req: UserRequest, res: Response) => {
+    try {
+        const posts = await prisma.post.findMany({
+            orderBy: {
+                created_at: 'desc',
+            },
+            take: 5,
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                }
+
+            }
+        })
+        res.status(200).json(posts)
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
