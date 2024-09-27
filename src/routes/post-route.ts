@@ -6,7 +6,7 @@ import { createValidation } from "../validation/post-validation";
 const router = express.Router();
 
 router.post("/posts", verifyToken, createValidation, create);
-router.get("/posts/newest", verifyToken, getNewest)
+router.get("/posts/latest", verifyToken, getNewest)
 router.get("/posts/recommendation", verifyToken, getRecommendation);
 
 export default router;

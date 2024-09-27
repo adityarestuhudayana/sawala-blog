@@ -130,10 +130,10 @@ describe('API Test', () => {
         }, 10000);
     });
   
-    describe('GET /api/posts/newest', () => {
-        it("should return newest posts", async () => {
+    describe('GET /api/posts/latest', () => {
+        it("should return latest posts", async () => {
             const response = await supertest(app)
-                .get("/api/posts/newest")
+                .get("/api/posts/latest")
                 .set('Authorization', `Bearer ${token}`);
     
             expect(response.status).toBe(200);
