@@ -57,7 +57,7 @@ export const getNewest = async (req: UserRequest, res: Response) => {
         }
     }
 }
-  
+
 export const getRecommendation = async (req: Request, res: Response) => {
     try {
         const postsCount = await prisma.post.count();
@@ -93,6 +93,37 @@ export const getRecommendation = async (req: Request, res: Response) => {
         });
 
         res.json({ data: posts });
+    } catch (error) {
+        if (error instanceof Error) return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const findOne = async (req: Request, res: Response) => {
+    try {
+        const postId: number = parseInt(req.params.postId);
+
+        const post = await prisma.post.findFirst({
+            where: {
+                id: postId,
+            },
+            include: {
+                user: true,
+                favouritedBy: true
+            }
+        });
+
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        res.json({
+            id: post.id,
+            name: post.name,
+            description: post.description,
+            image: post.image,
+            likes: post.favouritedBy.length,
+            created_at: post.created_at, 
+            user: post.user,
+        });
     } catch (error) {
         if (error instanceof Error) return res.status(500).json({ message: error.message });
         res.status(500).json({ message: "Internal server error" });

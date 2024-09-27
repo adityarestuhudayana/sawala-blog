@@ -172,6 +172,24 @@ describe('API Test', () => {
         });
     });
 
+    describe('GET /api/posts/:id', () => {
+        it('should findone post', async () => {
+            const response = await supertest(app)
+                .get(`/api/posts/${postId}`)
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('id');
+            expect(response.body).toHaveProperty('name');
+            expect(response.body).toHaveProperty('description');
+            expect(response.body).toHaveProperty('image');
+            expect(response.body).toHaveProperty('created_at');
+            expect(response.body).toHaveProperty('likes');
+            expect(response.body).toHaveProperty('user');
+            expect(response.body.user).toHaveProperty('profilePicture');
+        });
+    });
+
     describe('POST /api/auth/logout', () => {
         it("should logout the user", async () => {
             const response = await supertest(app)
