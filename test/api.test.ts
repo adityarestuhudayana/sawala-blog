@@ -129,17 +129,17 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('updated_at');
         }, 10000);
     });
-  
+
     describe('GET /api/posts/latest', () => {
         it("should return latest posts", async () => {
             const response = await supertest(app)
                 .get("/api/posts/latest")
                 .set('Authorization', `Bearer ${token}`);
-    
+
             expect(response.status).toBe(200);
             expect(response.body).toBeInstanceOf(Array);
             expect(response.body.length).toBeGreaterThan(0);
-    
+
             response.body.forEach((post: any) => {
                 expect(post).toHaveProperty('id');
                 expect(post).toHaveProperty('name');
@@ -172,6 +172,21 @@ describe('API Test', () => {
         });
     });
 
+    describe('DELETE /api/posts/:id', () => {
+        it("should delete the user's own post", async () => {
+            const response = await supertest(app)
+                .delete(`/api/posts/${postId}`)
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('message', 'Post deleted successfully');
+            const postCheck = await prisma.post.findUnique({
+                where: { id: postId }
+            });
+            expect(postCheck).toBeNull();
+        });
+    });
+    
     describe('POST /api/auth/logout', () => {
         it("should logout the user", async () => {
             const response = await supertest(app)
