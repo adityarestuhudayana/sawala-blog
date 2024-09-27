@@ -128,7 +128,7 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('updated_at');
         }, 10000);
     });
-
+  
     describe('GET /api/posts/newest', () => {
         it("should return newest posts", async () => {
             const response = await supertest(app)
@@ -165,5 +165,3 @@ describe('API Test', () => {
         });
     });
 });
-
-
