@@ -3,6 +3,7 @@ import authRoutes from "./routes/auth-route";
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 import cors from 'cors'
+import postRoutes from "./routes/post-route";
 
 const app = express();
 dotenv.config();
@@ -11,6 +12,7 @@ app.use(express.json({limit: "10mb"}));
 app.use(cors({origin: ["http://localhost:5173"], credentials: true}))
 
 app.use("/api", authRoutes);
+app.use("/api", postRoutes);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
