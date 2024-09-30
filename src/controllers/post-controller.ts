@@ -298,26 +298,18 @@ export const likePost = async (req: UserRequest, res: Response) => {
 
 export const getFavourites = async (req: UserRequest, res: Response) => {
     try {
-        const posts = await prisma.post.findMany({
-            orderBy: {
-                favouritedBy: {
-                    _count: 'desc', 
-                },
-            },
+        const user = await prisma.user.findFirst({
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        profilePicture: true,
+                favourites: {
+                    include:{
+                        favouritedBy: true,
+                        user: true
                     }
                 },
-                favouritedBy: true, 
-            },
-            take: 10,
+            }
         });
 
-        const response = posts.map(post => ({
+        const response = user?.favourites.map(post => ({
             id: post.id,
             name: post.name,
             description: post.description,
@@ -338,7 +330,7 @@ export const getFavourites = async (req: UserRequest, res: Response) => {
 }
 
 export const searchPosts = async (req: UserRequest, res: Response) => {
-    const keyword = req.query.q as string
+    const keyword = req.query.search as string
 
     if (!keyword) {
         return res.status(400).json({ message: "Keyword is required" });
@@ -348,21 +340,9 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
         const posts = await prisma.post.findMany({
             where: {
                 OR: [
-                    {
-                        name: {
-                            contains: keyword,
-                        },
-                    },
-                    {
-                        location: {
-                            contains: keyword,
-                        },
-                    },
-                    {
-                        description: {
-                            contains: keyword,
-                        },
-                    },
+                    { name: { contains: keyword } },
+                    { location: { contains: keyword } },
+                    { description: { contains: keyword } },
                 ],
             },
             include: {
@@ -379,10 +359,18 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
             },
         });
 
+        const response = posts.map(post => ({
+            id: post.id,
+            name: post.name,
+            image: post.image,
+            created_at: post.created_at,
+            author: post.user,
+        }));
+
         if (posts.length === 0) {
             return res.status(404).json({ message: "No posts found" });
         }
-        res.status(200).json(posts);
+        res.status(200).json(response);
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });

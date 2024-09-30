@@ -240,32 +240,30 @@ describe('API Test', () => {
         });
     });
 
-    // describe('GET /api/posts/search', () => {
-    //     it('should return posts based on search keyword', async () => {
-    //         const response = await supertest(app)
-    //             .get('/api/posts/search?q=beach')
-    //             .set('Authorization', `Bearer ${token}`);
+    describe('GET /api/posts?search', () => {
+        it('should return posts based on search keyword', async () => {
+            const response = await supertest(app)
+                .get('/api/posts?search=test')
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toBeInstanceOf(Array);
+            expect(response.body[0]).toHaveProperty('id');
+            expect(response.body[0]).toHaveProperty('name');
+            expect(response.body[0]).toHaveProperty('image');
+            expect(response.body[0]).toHaveProperty('author');
+            expect(response.body[0].author).toHaveProperty('name');
+        });
     
-    //         expect(response.status).toBe(200);
-    //         expect(response.body).toBeInstanceOf(Array);
-    //         expect(response.body[0]).toHaveProperty('id');
-    //         expect(response.body[0]).toHaveProperty('name');
-    //         expect(response.body[0]).toHaveProperty('location');
-    //         expect(response.body[0]).toHaveProperty('description');
-    //         expect(response.body[0]).toHaveProperty('image');
-    //         expect(response.body[0]).toHaveProperty('user');
-    //         expect(response.body[0].user).toHaveProperty('name');
-    //     });
+        it('should return 404 if no posts match the search keyword', async () => {
+            const response = await supertest(app)
+                .get('/api/posts?search=nonexistent')
+                .set('Authorization', `Bearer ${token}`);
     
-    //     it('should return 404 if no posts match the search keyword', async () => {
-    //         const response = await supertest(app)
-    //             .get('/api/posts/search?q=nonexistent')
-    //             .set('Authorization', `Bearer ${token}`);
-    
-    //         expect(response.status).toBe(404);
-    //         expect(response.body).toHaveProperty('message', 'No posts found');
-    //     });
-    // });
+            expect(response.status).toBe(404);
+            expect(response.body).toHaveProperty('message', 'No posts found');
+        });
+    });
 
     describe('GET /api/posts/favourites', () => {
         it('should get the top 10 favourite posts', async () => {
@@ -276,7 +274,6 @@ describe('API Test', () => {
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('data');
             expect(response.body.data).toBeInstanceOf(Array);
-            expect(response.body.data.length).toBeLessThanOrEqual(10);  // Should be max 10 posts
     
             response.body.data.forEach((post: any) => {
                 expect(post).toHaveProperty('id');
