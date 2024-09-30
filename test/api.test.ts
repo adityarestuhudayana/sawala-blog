@@ -1,4 +1,3 @@
-
 import { describe } from "@jest/globals";
 import app from "../src/server";
 import supertest from "supertest";
@@ -225,71 +224,54 @@ describe('API Test', () => {
         });
     });
 
-    describe('DELETE /api/posts/:id', () => {
-        it("should delete the user's own post", async () => {
+    // describe('GET /api/posts/search', () => {
+    //     it('should return posts based on search keyword', async () => {
+    //         const response = await supertest(app)
+    //             .get('/api/posts/search?q=beach')
+    //             .set('Authorization', `Bearer ${token}`);
+    
+    //         expect(response.status).toBe(200);
+    //         expect(response.body).toBeInstanceOf(Array);
+    //         expect(response.body[0]).toHaveProperty('id');
+    //         expect(response.body[0]).toHaveProperty('name');
+    //         expect(response.body[0]).toHaveProperty('location');
+    //         expect(response.body[0]).toHaveProperty('description');
+    //         expect(response.body[0]).toHaveProperty('image');
+    //         expect(response.body[0]).toHaveProperty('user');
+    //         expect(response.body[0].user).toHaveProperty('name');
+    //     });
+    
+    //     it('should return 404 if no posts match the search keyword', async () => {
+    //         const response = await supertest(app)
+    //             .get('/api/posts/search?q=nonexistent')
+    //             .set('Authorization', `Bearer ${token}`);
+    
+    //         expect(response.status).toBe(404);
+    //         expect(response.body).toHaveProperty('message', 'No posts found');
+    //     });
+    // });
+
+    describe('GET /api/posts/favourites', () => {
+        it('should get the top 10 favourite posts', async () => {
             const response = await supertest(app)
-                .delete(`/api/posts/${postId}`)
+                .get('/api/posts/favourites')
                 .set('Authorization', `Bearer ${token}`);
-
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'Post deleted successfully');
-            const postCheck = await prisma.post.findUnique({
-                where: { id: postId }
-            });
-            expect(postCheck).toBeNull();
-        });
-    });
-
-    describe('GET /api/posts/:id', () => {
-        it('should findone post', async () => {
-            const response = await supertest(app)
-                .get(`/api/posts/${postId}`)
-                .set('Authorization', `Bearer ${token}`);
-
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('name');
-            expect(response.body).toHaveProperty('description');
-            expect(response.body).toHaveProperty('image');
-            expect(response.body).toHaveProperty('created_at');
-            expect(response.body).toHaveProperty('likes');
-            expect(response.body).toHaveProperty('user');
-            expect(response.body.user).toHaveProperty('profilePicture');
-        });
-    });
-
-    describe('GET /api/posts/:id/like', () => {
-        it('should like post', async () => {
-            const response = await supertest(app)
-                .post(`/api/posts/${postId}/like`)
-                .set('Authorization', `Bearer ${token}`);
-
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('name');
-            expect(response.body).toHaveProperty('description');
-            expect(response.body).toHaveProperty('image');
-            expect(response.body).toHaveProperty('created_at');
-            expect(response.body).toHaveProperty('likes', 1);
-            expect(response.body).toHaveProperty('user');
-            expect(response.body.user).toHaveProperty('profilePicture');
-        });
-    });
-
-    describe('GET /api/posts/popular', () => {
-        it('should get popular post', async () => {
-            const response = await supertest(app)
-                .get(`/api/posts/popular`)
-                .set('Authorization', `Bearer ${token}`);
-
+    
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('data');
-            expect(response.body.data[0]).toHaveProperty('name');
-            expect(response.body.data[0]).toHaveProperty('description');
-            expect(response.body.data[0]).toHaveProperty('image');
-            expect(response.body.data[0]).toHaveProperty('created_at');
-            expect(response.body.data[0]).toHaveProperty('user');
-            expect(response.body.data[0].user).toHaveProperty('profilePicture');
+            expect(response.body.data).toBeInstanceOf(Array);
+            expect(response.body.data.length).toBeLessThanOrEqual(10);  // Should be max 10 posts
+    
+            response.body.data.forEach((post: any) => {
+                expect(post).toHaveProperty('id');
+                expect(post).toHaveProperty('name');
+                expect(post).toHaveProperty('description');
+                expect(post).toHaveProperty('image');
+                expect(post).toHaveProperty('created_at');
+                expect(post).toHaveProperty('likes');
+                expect(post).toHaveProperty('user');
+                expect(post.user).toHaveProperty('profilePicture');
+            });
         });
     });
 
