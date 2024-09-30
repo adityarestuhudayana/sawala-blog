@@ -19,9 +19,29 @@ export const create = async (req: UserRequest, res: Response) => {
                 ...request,
                 user_id: user!.id,
             },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                }
+            }
         });
 
-        res.status(201).json(post);
+        res.status(201).json({
+            id: post.id,
+            name: post.name,
+            location: post.location,
+            description: post.description,
+            image: post.image,
+            visited: post.visited,
+            created_at: post.created_at,
+            updated_at: post.updated_at,
+            author: post.user
+        });
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
@@ -49,7 +69,20 @@ export const getNewest = async (req: UserRequest, res: Response) => {
 
             }
         })
-        res.status(200).json(posts)
+
+        const response = posts.map((post) => ({
+            id: post.id,
+            name: post.name,
+            location: post.location,
+            description: post.description,
+            image: post.image,
+            visited: post.visited,
+            created_at: post.created_at,
+            updated_at: post.updated_at,
+            author: post.user
+        }));
+
+        res.status(200).json(response)
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
@@ -86,6 +119,7 @@ export const getRecommendation = async (req: Request, res: Response) => {
                 image: true,
                 user: {
                     select: {
+                        id: true,
                         name: true,
                         profilePicture: true
                     }
@@ -93,7 +127,14 @@ export const getRecommendation = async (req: Request, res: Response) => {
             }
         });
 
-        res.json({ data: posts });
+        const response = posts.map((post) => ({
+            id: post.id,
+            name: post.name,
+            image: post.image,
+            author: post.user
+        }));
+
+        res.json({ data: response });
     } catch (error) {
         if (error instanceof Error) return res.status(500).json({ message: error.message });
         res.status(500).json({ message: "Internal server error" });
@@ -109,12 +150,28 @@ export const findOne = async (req: Request, res: Response) => {
                 id: postId,
             },
             include: {
-                user: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                },
                 favouritedBy: true
             }
         });
 
         if (!post) return res.status(404).json({ message: "Post not found" });
+
+        await prisma.post.update({
+            where: {
+                id: post.id,
+            },
+            data: {
+                visited: post.visited + 1,
+            },
+        });
 
         res.json({
             id: post.id,
@@ -123,7 +180,7 @@ export const findOne = async (req: Request, res: Response) => {
             image: post.image,
             likes: post.favouritedBy.length,
             created_at: post.created_at,
-            user: post.user,
+            author: post.user,
         });
     } catch (error) {
         if (error instanceof Error) return res.status(500).json({ message: error.message });
@@ -135,8 +192,63 @@ export const likePost = async (req: UserRequest, res: Response) => {
     try {
         const postId: number = parseInt(req.params.postId);
         const userId: number = req.user!.id;
+        let updatedPost;
 
-        const updatedPost = await prisma.post.update({
+        const post = await prisma.post.findFirst({
+            where: {
+                id: postId,
+            },
+            include: {
+                favouritedBy: true,
+            }
+        });
+
+        const isUserAlreadyLiked = post?.favouritedBy.find((u) => u.id === userId);
+
+        if (isUserAlreadyLiked) {
+            updatedPost = await prisma.post.update({
+                where: {
+                    id: postId,
+                },
+                data: {
+                    favouritedBy: {
+                        disconnect: {
+                            id: userId,
+                        },
+                    },
+                },
+                include: {
+                    favouritedBy: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            profilePicture: true,
+                        }
+                    },
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            profilePicture: true,
+                        }
+                    },
+                }
+            });
+
+            return res.json({
+                id: updatedPost.id,
+                name: updatedPost.name,
+                description: updatedPost.description,
+                image: updatedPost.image,
+                likes: updatedPost.favouritedBy.length,
+                created_at: updatedPost.created_at,
+                author: updatedPost.user,
+            })
+        }
+
+        updatedPost = await prisma.post.update({
             where: {
                 id: postId,
             },
@@ -146,8 +258,22 @@ export const likePost = async (req: UserRequest, res: Response) => {
                 },
             },
             include: {
-                user: true,
-                favouritedBy: true,
+                favouritedBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                },
             }
         });
 
@@ -158,7 +284,7 @@ export const likePost = async (req: UserRequest, res: Response) => {
             image: updatedPost.image,
             likes: updatedPost.favouritedBy.length,
             created_at: updatedPost.created_at,
-            user: updatedPost.user,
+            author: updatedPost.user,
         };
 
         res.json(response);
@@ -166,7 +292,7 @@ export const likePost = async (req: UserRequest, res: Response) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
             return res.status(404).json({ message: 'Post not found' });
         }
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -182,11 +308,29 @@ export const getPopular = async (req: UserRequest, res: Response) => {
                 }
             ],
             include: {
-                user: true
+                user: {
+                    select: {
+                        id:true,
+                        name: true,
+                        email: true,
+                        profilePicture: true,
+                    }
+                }
             }
         });
 
-        res.json({data: posts});
+        const response = posts.map((post) => ({
+            id: post.id,
+            name: post.name,
+            location: post.location,
+            description: post.description,
+            image: post.image,
+            visited: post.visited,
+            created_at: post.created_at,
+            author: post.user
+        }));
+
+        res.json({ data: response });
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });
@@ -195,7 +339,7 @@ export const getPopular = async (req: UserRequest, res: Response) => {
         }
     }
 }
-  
+
 export const deletePost = async (req: UserRequest, res: Response) => {
     try {
         if (!req.user) {

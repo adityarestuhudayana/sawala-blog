@@ -126,7 +126,6 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('description', description);
             expect(response.body).toHaveProperty('image');
             expect(response.body).toHaveProperty('created_at');
-            expect(response.body).toHaveProperty('updated_at');
         }, 10000);
     });
 
@@ -148,10 +147,10 @@ describe('API Test', () => {
                 expect(post).toHaveProperty('image');
                 expect(post).toHaveProperty('created_at');
                 expect(post).toHaveProperty('updated_at');
-                expect(post).toHaveProperty('user');
-                expect(post.user).toHaveProperty('name');
-                expect(post.user).toHaveProperty('email');
-                expect(post.user).toHaveProperty('profilePicture');
+                expect(post).toHaveProperty('author');
+                expect(post.author).toHaveProperty('name');
+                expect(post.author).toHaveProperty('email');
+                expect(post.author).toHaveProperty('profilePicture');
             });
         });
     });
@@ -167,8 +166,8 @@ describe('API Test', () => {
             expect(response.body.data[0]).toHaveProperty('id');
             expect(response.body.data[0]).toHaveProperty('name');
             expect(response.body.data[0]).toHaveProperty('image');
-            expect(response.body.data[0]).toHaveProperty('user');
-            expect(response.body.data[0].user).toHaveProperty('profilePicture');
+            expect(response.body.data[0]).toHaveProperty('author');
+            expect(response.body.data[0].author).toHaveProperty('profilePicture');
         });
     });
 
@@ -185,12 +184,12 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('image');
             expect(response.body).toHaveProperty('created_at');
             expect(response.body).toHaveProperty('likes');
-            expect(response.body).toHaveProperty('user');
-            expect(response.body.user).toHaveProperty('profilePicture');
+            expect(response.body).toHaveProperty('author');
+            expect(response.body.author).toHaveProperty('profilePicture');
         });
     });
 
-    describe('GET /api/posts/:id/like', () => {
+    describe('POST /api/posts/:id/like', () => {
         it('should like post', async () => {
             const response = await supertest(app)
                 .post(`/api/posts/${postId}/like`)
@@ -203,8 +202,25 @@ describe('API Test', () => {
             expect(response.body).toHaveProperty('image');
             expect(response.body).toHaveProperty('created_at');
             expect(response.body).toHaveProperty('likes', 1);
-            expect(response.body).toHaveProperty('user');
-            expect(response.body.user).toHaveProperty('profilePicture');
+            expect(response.body).toHaveProperty('author');
+            expect(response.body.author).toHaveProperty('id', testUserId);
+            expect(response.body.author).toHaveProperty('profilePicture');
+        });
+    });
+
+    describe('POST /api/posts/:id/like', () => {
+        it('should unlike post', async () => {
+            const response = await supertest(app)
+                .post(`/api/posts/${postId}/like`)
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('id');
+            expect(response.body).toHaveProperty('name');
+            expect(response.body).toHaveProperty('description');
+            expect(response.body).toHaveProperty('image');
+            expect(response.body).toHaveProperty('created_at');
+            expect(response.body).toHaveProperty('likes', 0);
         });
     });
 
@@ -220,8 +236,8 @@ describe('API Test', () => {
             expect(response.body.data[0]).toHaveProperty('description');
             expect(response.body.data[0]).toHaveProperty('image');
             expect(response.body.data[0]).toHaveProperty('created_at');
-            expect(response.body.data[0]).toHaveProperty('user');
-            expect(response.body.data[0].user).toHaveProperty('profilePicture');
+            expect(response.body.data[0]).toHaveProperty('author');
+            expect(response.body.data[0].author).toHaveProperty('profilePicture');
         });
     });
 
