@@ -51,6 +51,38 @@ export const create = async (req: UserRequest, res: Response) => {
     }
 }
 
+export const getMyPosts = async( req: UserRequest, res: Response) => {
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                id: req.user!.id
+            },
+            include: {
+                posts: true
+            }
+        });
+
+        const response = user?.posts.map(post => ({
+            name: post.name,
+            image: post.image,
+            created_at: post.created_at,
+            user: {
+                name: user.name,
+                email: user.email,
+                profilePicture: user.profilePicture
+            },
+        }));
+        res.status(200).json({ data: response });
+
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
+
 export const getNewest = async (req: UserRequest, res: Response) => {
     try {
         const posts = await prisma.post.findMany({
