@@ -359,10 +359,18 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
             },
         });
 
+        const response = posts.map(post => ({
+            id: post.id,
+            name: post.name,
+            image: post.image,
+            created_at: post.created_at,
+            author: post.user,
+        }));
+
         if (posts.length === 0) {
             return res.status(404).json({ message: "No posts found" });
         }
-        res.status(200).json(posts);
+        res.status(200).json(response);
     } catch (error) {
         if (error instanceof Error) {
             return res.status(500).json({ message: error.message });

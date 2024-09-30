@@ -240,26 +240,24 @@ describe('API Test', () => {
         });
     });
 
-    describe('GET /api/search', () => {
+    describe('GET /api/posts?search', () => {
         it('should return posts based on search keyword', async () => {
             const response = await supertest(app)
-                .get('/api/search?search=test')
+                .get('/api/posts?search=test')
                 .set('Authorization', `Bearer ${token}`);
-                
+
             expect(response.status).toBe(200);
             expect(response.body).toBeInstanceOf(Array);
             expect(response.body[0]).toHaveProperty('id');
             expect(response.body[0]).toHaveProperty('name');
-            expect(response.body[0]).toHaveProperty('location');
-            expect(response.body[0]).toHaveProperty('description');
             expect(response.body[0]).toHaveProperty('image');
-            expect(response.body[0]).toHaveProperty('user');
-            expect(response.body[0].user).toHaveProperty('name');
+            expect(response.body[0]).toHaveProperty('author');
+            expect(response.body[0].author).toHaveProperty('name');
         });
     
         it('should return 404 if no posts match the search keyword', async () => {
             const response = await supertest(app)
-                .get('/api/search?search=nonexistent')
+                .get('/api/posts?search=nonexistent')
                 .set('Authorization', `Bearer ${token}`);
     
             expect(response.status).toBe(404);
