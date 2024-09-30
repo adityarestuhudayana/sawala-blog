@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken";
-import { create, getRecommendation, getNewest, findOne, likePost, getPopular, deletePost, getFavourites, searchPosts, getMyPosts, searchMyPosts } from "../controllers/post-controller";
+import { create, getRecommendation, getNewest, findOne, likePost, getPopular, deletePost, getFavourites, searchPosts, getMyPosts } from "../controllers/post-controller";
 import { createValidation } from "../validation/post-validation";
 
 const router = express.Router();

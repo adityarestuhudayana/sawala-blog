@@ -140,27 +140,6 @@ describe('API Test', () => {
         });
     });
 
-    describe('GET /api/posts/me?search', () => {
-        it('should return posts matching the search keyword for the authenticated user', async () => {
-            const response = await supertest(app)
-                .get(`/api/posts/me?search=test`)
-                .set('Authorization', `Bearer ${token}`);
-    
-            expect(response.status).toBe(200);
-            expect(response.body).toBeInstanceOf(Array);
-            expect(response.body.length).toBeGreaterThan(0); 
-        });
-
-        it('should return 404 if no posts match the search keyword', async () => {
-            const response = await supertest(app)
-                .get(`/api/posts/me?search=gakada`)
-                .set('Authorization',`Bearer ${token}`);
-    
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('message', 'No posts found');
-        });
-    });
-    
     describe('GET /api/posts/latest', () => {
         it("should return latest posts", async () => {
             const response = await supertest(app)
