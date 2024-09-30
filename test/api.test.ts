@@ -128,6 +128,19 @@ describe('API Test', () => {
         }, 10000);
     });
 
+    describe('GET /api/posts/me', () => {
+        it('should return all posts created by the authenticated user', async () => {
+            const response = await supertest(app)
+                .get("/api/posts/me")
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data).toBeInstanceOf(Array);
+        });
+    });
+
+
     describe('GET /api/posts/latest', () => {
         it("should return latest posts", async () => {
             const response = await supertest(app)
