@@ -170,6 +170,102 @@ export const likePost = async (req: UserRequest, res: Response) => {
     }
 }
 
+export const getFavourites = async (req: UserRequest, res: Response) => {
+    try {
+        const posts = await prisma.post.findMany({
+            orderBy: {
+                favouritedBy: {
+                    _count: 'desc', 
+                },
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profilePicture: true,
+                    }
+                },
+                favouritedBy: true, 
+            },
+            take: 10,
+        });
+
+        const response = posts.map(post => ({
+            id: post.id,
+            name: post.name,
+            description: post.description,
+            image: post.image,
+            created_at: post.created_at,
+            likes: post.favouritedBy.length,
+            user: post.user,
+        }));
+
+        res.status(200).json({ data: response });
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
+
+export const searchPosts = async (req: UserRequest, res: Response) => {
+    const keyword = req.query.q as string
+
+    if (!keyword) {
+        return res.status(400).json({ message: "Keyword is required" });
+    }
+
+    try {
+        const posts = await prisma.post.findMany({
+            where: {
+                OR: [
+                    {
+                        name: {
+                            contains: keyword,
+                        },
+                    },
+                    {
+                        location: {
+                            contains: keyword,
+                        },
+                    },
+                    {
+                        description: {
+                            contains: keyword,
+                        },
+                    },
+                ],
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profilePicture: true,
+                    },
+                },
+            },
+            orderBy: {
+                created_at: 'desc',
+            },
+        });
+
+        if (posts.length === 0) {
+            return res.status(404).json({ message: "No posts found" });
+        }
+        res.status(200).json(posts);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+};
+
 export const getPopular = async (req: UserRequest, res: Response) => {
     try {
         const posts = await prisma.post.findMany({

@@ -134,7 +134,7 @@ export const updateProfile = async (req: UserRequest, res: Response) => {
                 profilePicture: cloudinaryResponse?.secure_url || existsUser?.profilePicture, // Gunakan gambar lama jika tidak ada yang baru
                 profilePicturePublicId: cloudinaryResponse?.public_id || existsUser?.profilePicturePublicId, // Gunakan public_id lama jika tidak ada yang baru
             },
-            select: {
+            select: {   
                 id: true,
                 name: true,
                 email: true,

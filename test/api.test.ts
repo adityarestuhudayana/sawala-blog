@@ -1,4 +1,3 @@
-
 import { describe } from "@jest/globals";
 import app from "../src/server";
 import supertest from "supertest";
@@ -222,6 +221,57 @@ describe('API Test', () => {
             expect(response.body.data[0]).toHaveProperty('created_at');
             expect(response.body.data[0]).toHaveProperty('user');
             expect(response.body.data[0].user).toHaveProperty('profilePicture');
+        });
+    });
+
+    // describe('GET /api/posts/search', () => {
+    //     it('should return posts based on search keyword', async () => {
+    //         const response = await supertest(app)
+    //             .get('/api/posts/search?q=beach')
+    //             .set('Authorization', `Bearer ${token}`);
+    
+    //         expect(response.status).toBe(200);
+    //         expect(response.body).toBeInstanceOf(Array);
+    //         expect(response.body[0]).toHaveProperty('id');
+    //         expect(response.body[0]).toHaveProperty('name');
+    //         expect(response.body[0]).toHaveProperty('location');
+    //         expect(response.body[0]).toHaveProperty('description');
+    //         expect(response.body[0]).toHaveProperty('image');
+    //         expect(response.body[0]).toHaveProperty('user');
+    //         expect(response.body[0].user).toHaveProperty('name');
+    //     });
+    
+    //     it('should return 404 if no posts match the search keyword', async () => {
+    //         const response = await supertest(app)
+    //             .get('/api/posts/search?q=nonexistent')
+    //             .set('Authorization', `Bearer ${token}`);
+    
+    //         expect(response.status).toBe(404);
+    //         expect(response.body).toHaveProperty('message', 'No posts found');
+    //     });
+    // });
+
+    describe('GET /api/posts/favourites', () => {
+        it('should get the top 10 favourite posts', async () => {
+            const response = await supertest(app)
+                .get('/api/posts/favourites')
+                .set('Authorization', `Bearer ${token}`);
+    
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data).toBeInstanceOf(Array);
+            expect(response.body.data.length).toBeLessThanOrEqual(10);  // Should be max 10 posts
+    
+            response.body.data.forEach((post: any) => {
+                expect(post).toHaveProperty('id');
+                expect(post).toHaveProperty('name');
+                expect(post).toHaveProperty('description');
+                expect(post).toHaveProperty('image');
+                expect(post).toHaveProperty('created_at');
+                expect(post).toHaveProperty('likes');
+                expect(post).toHaveProperty('user');
+                expect(post.user).toHaveProperty('profilePicture');
+            });
         });
     });
 
