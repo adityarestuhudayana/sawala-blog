@@ -121,6 +121,55 @@ export const getMyPosts = async( req: UserRequest, res: Response) => {
     }
 }
 
+export const searchMyPosts = async (req: UserRequest, res: Response) => {
+    const keyword = req.query.search as string
+
+    try {
+        const posts = await prisma.post.findMany({
+            where: {
+                OR: [
+                    { name: { contains: keyword } },
+                    { location: { contains: keyword } },
+                    { description: { contains: keyword } },
+                ],
+                user_id: req.user!.id
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profilePicture: true,
+                    },
+                },
+            },
+            orderBy: {
+                created_at: 'desc',
+            },
+        });
+
+        const response = posts.map(post => ({
+            id: post.id,
+            name: post.name,
+            image: post.image,
+            created_at: post.created_at,
+            author: post.user,
+        }));
+
+        if (posts.length === 0) {
+            return res.status(404).json({ message: "No posts found" });
+        }
+        res.status(200).json(response);
+        
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
+
 export const getNewest = async (req: UserRequest, res: Response) => {
     try {
         const posts = await prisma.post.findMany({
