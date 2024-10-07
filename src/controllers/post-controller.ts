@@ -221,7 +221,7 @@ export const getNewest = async (req: UserRequest, res: Response) => {
 export const getRecommendation = async (req: Request, res: Response) => {
   try {
     const postCount = await prisma.post.count();
-    const posts = await prisma.post.findMany({
+    let posts = await prisma.post.findMany({
       orderBy: {
         created_at: "desc",
       },
@@ -239,16 +239,26 @@ export const getRecommendation = async (req: Request, res: Response) => {
       },
     });
 
-    const randomNumber: number[] = [];
+    const randomNumbers = new Set();
+    if (postCount < 5) {
+      const n = postCount;
 
-    for (let i = 0; i < 5; i++) {
-      const rand = Math.floor(Math.random() * postCount);
-      randomNumber.push(rand);
+      while (randomNumbers.size < n) {
+        randomNumbers.add(Math.floor(Math.random() * postCount));
+      }
+    } else {
+      const n = 5;
+
+      while (randomNumbers.size < n) {
+        randomNumbers.add(Math.floor(Math.random() * postCount));
+      }
     }
 
-    const postsRandom = randomNumber.map(index => posts[index]);
+    const uniqueRandomNumbers: number[] = Array.from(randomNumbers) as number[];
 
-    const response = postsRandom.map((post) => ({
+    posts = uniqueRandomNumbers.map((index) => posts[index]);
+
+    const response = posts.map((post) => ({
       id: post.id,
       name: post.name,
       image: post.image,
