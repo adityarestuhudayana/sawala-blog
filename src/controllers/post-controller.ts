@@ -220,22 +220,8 @@ export const getNewest = async (req: UserRequest, res: Response) => {
 
 export const getRecommendation = async (req: Request, res: Response) => {
   try {
-    const postsCount = await prisma.post.count();
-
-    if (postsCount === 0) {
-      return res.status(404).json({ message: "there is no data posts" });
-    }
-
-    const skip = Math.floor(Math.random() * postsCount);
-    let take = 5;
-
-    if (postsCount - skip < take) {
-      take = postsCount - skip;
-    }
-
-    const posts = await prisma.post.findMany({
-      take,
-      skip,
+    const postCount = await prisma.post.count();
+    let posts = await prisma.post.findMany({
       orderBy: {
         created_at: "desc",
       },
@@ -252,6 +238,25 @@ export const getRecommendation = async (req: Request, res: Response) => {
         },
       },
     });
+
+    const randomNumbers = new Set();
+    if (postCount < 5) {
+      const n = postCount;
+
+      while (randomNumbers.size < n) {
+        randomNumbers.add(Math.floor(Math.random() * postCount));
+      }
+    } else {
+      const n = 5;
+
+      while (randomNumbers.size < n) {
+        randomNumbers.add(Math.floor(Math.random() * postCount));
+      }
+    }
+
+    const uniqueRandomNumbers: number[] = Array.from(randomNumbers) as number[];
+
+    posts = uniqueRandomNumbers.map((index) => posts[index]);
 
     const response = posts.map((post) => ({
       id: post.id,
@@ -605,7 +610,7 @@ export const updatePost = async (req: UserRequest, res: Response) => {
     data.image = cloudinaryResponse?.secure_url || post.image;
     data.imagePublicId = cloudinaryResponse?.public_id || post.imagePublicId;
 
-    const updatedPost = await prisma.post.update({
+    await prisma.post.update({
       where: {
         id: post.id,
       },

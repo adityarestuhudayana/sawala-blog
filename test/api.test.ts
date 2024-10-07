@@ -24,7 +24,7 @@ describe("API Test", () => {
   let postId: number;
 
   beforeAll(async () => {
-    await supertest(app).post("/api/auth/register").send({
+    const user = await supertest(app).post("/api/auth/register").send({
       name: "Testing",
       email: testEmail,
       password: "test",
@@ -328,7 +328,6 @@ describe("API Test", () => {
           image: newPostImage,
         });
 
-      console.log(response.body);
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("name", "New Name");
       expect(response.body).toHaveProperty("image");
