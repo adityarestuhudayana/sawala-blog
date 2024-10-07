@@ -24,7 +24,7 @@ describe("API Test", () => {
   let postId: number;
 
   beforeAll(async () => {
-    const user = await supertest(app).post("/api/auth/register").send({
+    await supertest(app).post("/api/auth/register").send({
       name: "Testing",
       email: testEmail,
       password: "test",
