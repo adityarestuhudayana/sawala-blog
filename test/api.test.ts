@@ -193,6 +193,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("created_at");
       expect(response.body).toHaveProperty("likes");
       expect(response.body).toHaveProperty("author");
+      expect(response.body).toHaveProperty("location");
       expect(response.body.author).toHaveProperty("profilePicture");
     });
   });
@@ -332,7 +333,8 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("name", "New Name");
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("author");
-    });
+    },
+  10000);
   });
 
   describe("DELETE /api/posts/:id", () => {

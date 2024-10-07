@@ -310,6 +310,7 @@ export const findOne = async (req: Request, res: Response) => {
       name: post.name,
       description: post.description,
       image: post.image,
+      location: post.location,
       likes: post.favouritedBy.length,
       created_at: post.created_at,
       author: post.user,
