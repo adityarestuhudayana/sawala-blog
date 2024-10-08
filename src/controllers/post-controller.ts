@@ -357,6 +357,9 @@ export const likePost = async (req: UserRequest, res: Response) => {
 export const getFavourites = async (req: UserRequest, res: Response) => {
   try {
     const user = await prisma.user.findFirst({
+      where: {
+        id: req.user!.id,
+      },
       include: {
         favourites: {
           include: {

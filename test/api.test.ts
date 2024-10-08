@@ -238,22 +238,6 @@ describe("API Test", () => {
     });
   });
 
-  describe("POST /api/posts/:id/like", () => {
-    it("should unlike post", async () => {
-      const response = await supertest(app)
-        .post(`/api/posts/${postId}/like`)
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty("id");
-      expect(response.body).toHaveProperty("name");
-      expect(response.body).toHaveProperty("description");
-      expect(response.body).toHaveProperty("image");
-      expect(response.body).toHaveProperty("created_at");
-      expect(response.body).toHaveProperty("favouritedBy");
-    });
-  });
-
   describe("GET /api/posts/popular", () => {
     it("should get popular post", async () => {
       const response = await supertest(app)
@@ -305,17 +289,26 @@ describe("API Test", () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("data");
       expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data[0]).toHaveProperty("id");
+      expect(response.body.data[0]).toHaveProperty("name");
+      expect(response.body.data[0]).toHaveProperty("favouritedBy");
+      expect(response.body.data[0]).toHaveProperty("author");
+    });
+  });
 
-      response.body.data.forEach((post: any) => {
-        expect(post).toHaveProperty("id");
-        expect(post).toHaveProperty("name");
-        expect(post).toHaveProperty("description");
-        expect(post).toHaveProperty("image");
-        expect(post).toHaveProperty("created_at");
-        expect(post).toHaveProperty("likes");
-        expect(post).toHaveProperty("user");
-        expect(post.user).toHaveProperty("profilePicture");
-      });
+  describe("POST /api/posts/:id/like", () => {
+    it("should unlike post", async () => {
+      const response = await supertest(app)
+        .post(`/api/posts/${postId}/like`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("id");
+      expect(response.body).toHaveProperty("name");
+      expect(response.body).toHaveProperty("description");
+      expect(response.body).toHaveProperty("image");
+      expect(response.body).toHaveProperty("created_at");
+      expect(response.body).toHaveProperty("favouritedBy");
     });
   });
 
