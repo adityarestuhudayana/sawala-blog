@@ -30,7 +30,7 @@ export const create = async (req: UserRequest, res: Response) => {
         user_id: user!.id,
       },
       include: {
-        user: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -41,17 +41,7 @@ export const create = async (req: UserRequest, res: Response) => {
       },
     });
 
-    res.status(201).json({
-      id: post.id,
-      name: post.name,
-      location: post.location,
-      description: post.description,
-      image: post.image,
-      visited: post.visited,
-      created_at: post.created_at,
-      updated_at: post.updated_at,
-      author: post.user,
-    });
+    res.status(201).json(post);
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -74,7 +64,7 @@ export const getMyPosts = async (req: UserRequest, res: Response) => {
         user_id: req.user!.id,
       },
       include: {
-        user: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -87,18 +77,11 @@ export const getMyPosts = async (req: UserRequest, res: Response) => {
       },
     });
 
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      image: post.image,
-      created_at: post.created_at,
-      author: post.user,
-    }));
-
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
     }
-    return res.status(200).json(response);
+
+    return res.status(200).json(posts);
   }
   try {
     const user = await prisma.user.findFirst({
@@ -106,21 +89,15 @@ export const getMyPosts = async (req: UserRequest, res: Response) => {
         id: req.user!.id,
       },
       include: {
-        posts: true,
+        posts: {
+          include: {
+            author: true,
+          },
+        },
       },
     });
 
-    const response = user?.posts.map((post) => ({
-      name: post.name,
-      image: post.image,
-      created_at: post.created_at,
-      user: {
-        name: user.name,
-        email: user.email,
-        profilePicture: user.profilePicture,
-      },
-    }));
-    res.status(200).json({ data: response });
+    res.status(200).json({ data: user?.posts });
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -144,31 +121,17 @@ export const searchMyPosts = async (req: UserRequest, res: Response) => {
         user_id: req.user!.id,
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            profilePicture: true,
-          },
-        },
+        author: true,
       },
       orderBy: {
         created_at: "desc",
       },
     });
 
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      image: post.image,
-      created_at: post.created_at,
-      author: post.user,
-    }));
-
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
     }
-    res.status(200).json(response);
+    res.status(200).json(posts);
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -186,8 +149,9 @@ export const getNewest = async (req: UserRequest, res: Response) => {
       },
       take: 5,
       include: {
-        user: {
+        author: {
           select: {
+            id: true,
             name: true,
             email: true,
             profilePicture: true,
@@ -196,19 +160,7 @@ export const getNewest = async (req: UserRequest, res: Response) => {
       },
     });
 
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      location: post.location,
-      description: post.description,
-      image: post.image,
-      visited: post.visited,
-      created_at: post.created_at,
-      updated_at: post.updated_at,
-      author: post.user,
-    }));
-
-    res.status(200).json(response);
+    res.status(200).json(posts);
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -229,13 +181,7 @@ export const getRecommendation = async (req: Request, res: Response) => {
         id: true,
         name: true,
         image: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            profilePicture: true,
-          },
-        },
+        author: true,
       },
     });
 
@@ -258,14 +204,7 @@ export const getRecommendation = async (req: Request, res: Response) => {
 
     posts = uniqueRandomNumbers.map((index) => posts[index]);
 
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      image: post.image,
-      author: post.user,
-    }));
-
-    res.json({ data: response });
+    res.json({ data: posts });
   } catch (error) {
     if (error instanceof Error)
       return res.status(500).json({ message: error.message });
@@ -282,14 +221,7 @@ export const findOne = async (req: Request, res: Response) => {
         id: postId,
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            profilePicture: true,
-          },
-        },
+        author: true,
         favouritedBy: true,
       },
     });
@@ -305,16 +237,7 @@ export const findOne = async (req: Request, res: Response) => {
       },
     });
 
-    res.json({
-      id: post.id,
-      name: post.name,
-      description: post.description,
-      image: post.image,
-      location: post.location,
-      likes: post.favouritedBy.length,
-      created_at: post.created_at,
-      author: post.user,
-    });
+    res.json(post);
   } catch (error) {
     if (error instanceof Error)
       return res.status(500).json({ message: error.message });
@@ -360,7 +283,7 @@ export const likePost = async (req: UserRequest, res: Response) => {
               profilePicture: true,
             },
           },
-          user: {
+          author: {
             select: {
               id: true,
               name: true,
@@ -371,57 +294,38 @@ export const likePost = async (req: UserRequest, res: Response) => {
         },
       });
 
-      return res.json({
-        id: updatedPost.id,
-        name: updatedPost.name,
-        description: updatedPost.description,
-        image: updatedPost.image,
-        likes: updatedPost.favouritedBy.length,
-        created_at: updatedPost.created_at,
-        author: updatedPost.user,
+      return res.json(updatedPost);
+    } else {
+      updatedPost = await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          favouritedBy: {
+            connect: { id: userId },
+          },
+        },
+        include: {
+          favouritedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profilePicture: true,
+            },
+          },
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profilePicture: true,
+            },
+          },
+        },
       });
+      return res.json(updatedPost);
     }
-
-    updatedPost = await prisma.post.update({
-      where: {
-        id: postId,
-      },
-      data: {
-        favouritedBy: {
-          connect: { id: userId },
-        },
-      },
-      include: {
-        favouritedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            profilePicture: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            profilePicture: true,
-          },
-        },
-      },
-    });
-
-    const response = {
-      id: updatedPost.id,
-      name: updatedPost.name,
-      description: updatedPost.description,
-      image: updatedPost.image,
-      likes: updatedPost.favouritedBy.length,
-      created_at: updatedPost.created_at,
-      author: updatedPost.user,
-    };
-
-    res.json(response);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -439,24 +343,21 @@ export const getFavourites = async (req: UserRequest, res: Response) => {
       include: {
         favourites: {
           include: {
-            favouritedBy: true,
-            user: true,
+            favouritedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+              },
+            },
+            author: true,
           },
         },
       },
     });
 
-    const response = user?.favourites.map((post) => ({
-      id: post.id,
-      name: post.name,
-      description: post.description,
-      image: post.image,
-      created_at: post.created_at,
-      likes: post.favouritedBy.length,
-      user: post.user,
-    }));
-
-    res.status(200).json({ data: response });
+    res.status(200).json({ data: user?.favourites });
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -479,7 +380,7 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
         ],
       },
       include: {
-        user: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -492,18 +393,10 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
       },
     });
 
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      image: post.image,
-      created_at: post.created_at,
-      author: post.user,
-    }));
-
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
     }
-    res.status(200).json(response);
+    res.status(200).json(posts);
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -525,7 +418,7 @@ export const getPopular = async (req: UserRequest, res: Response) => {
         },
       ],
       include: {
-        user: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -535,19 +428,7 @@ export const getPopular = async (req: UserRequest, res: Response) => {
         },
       },
     });
-
-    const response = posts.map((post) => ({
-      id: post.id,
-      name: post.name,
-      location: post.location,
-      description: post.description,
-      image: post.image,
-      visited: post.visited,
-      created_at: post.created_at,
-      author: post.user,
-    }));
-
-    res.json({ data: response });
+    res.json({ data: posts });
   } catch (error) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -625,7 +506,7 @@ export const updatePost = async (req: UserRequest, res: Response) => {
         id: post.id,
       },
       include: {
-        user: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -636,16 +517,7 @@ export const updatePost = async (req: UserRequest, res: Response) => {
       },
     });
 
-    const response = {
-      id: post?.id,
-      name: post?.name,
-      description: post?.description,
-      image: post?.image,
-      created_at: post?.created_at,
-      author: post?.user,
-    };
-
-    res.json(response);
+    res.json(post);
   } catch (error) {
     console.log(error);
     if (error instanceof Error)

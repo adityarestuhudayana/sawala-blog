@@ -1,5 +1,15 @@
--- AlterTable
-ALTER TABLE `users` ADD COLUMN `profilePicture` TEXT NULL;
+-- CreateTable
+CREATE TABLE `users` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(100) NOT NULL,
+    `profilePicture` TEXT NULL,
+    `profilePicturePublicId` TEXT NULL,
+
+    UNIQUE INDEX `users_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `posts` (
@@ -8,6 +18,7 @@ CREATE TABLE `posts` (
     `location` VARCHAR(100) NOT NULL,
     `description` TEXT NOT NULL,
     `image` TEXT NOT NULL,
+    `imagePublicId` TEXT NULL,
     `visited` INTEGER NOT NULL DEFAULT 0,
     `user_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

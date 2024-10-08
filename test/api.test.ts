@@ -191,7 +191,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("description");
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("created_at");
-      expect(response.body).toHaveProperty("likes");
+      expect(response.body).toHaveProperty("favouritedBy");
       expect(response.body).toHaveProperty("author");
       expect(response.body).toHaveProperty("location");
       expect(response.body.author).toHaveProperty("profilePicture");
@@ -231,7 +231,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("description");
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("created_at");
-      expect(response.body).toHaveProperty("likes", 1);
+      expect(response.body).toHaveProperty("favouritedBy");
       expect(response.body).toHaveProperty("author");
       expect(response.body.author).toHaveProperty("id", testUserId);
       expect(response.body.author).toHaveProperty("profilePicture");
@@ -250,7 +250,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("description");
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("created_at");
-      expect(response.body).toHaveProperty("likes", 0);
+      expect(response.body).toHaveProperty("favouritedBy");
     });
   });
 
