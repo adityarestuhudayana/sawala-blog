@@ -99,7 +99,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("name", "Updated Name");
       expect(response.body).toHaveProperty("email", testEmail);
       expect(response.body).toHaveProperty("profilePicture");
-    }, 20000);
+    });
   });
 
   describe("POST /api/posts", () => {
@@ -122,7 +122,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("description", description);
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("created_at");
-    }, 10000);
+    });
   });
 
   describe("GET /api/posts/me", () => {
@@ -333,8 +333,7 @@ describe("API Test", () => {
       expect(response.body).toHaveProperty("name", "New Name");
       expect(response.body).toHaveProperty("image");
       expect(response.body).toHaveProperty("author");
-    },
-  10000);
+    });
   });
 
   describe("DELETE /api/posts/:id", () => {

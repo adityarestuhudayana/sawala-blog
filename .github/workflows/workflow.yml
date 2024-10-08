@@ -19,6 +19,7 @@ jobs:
       CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
       CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
       CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
     steps:
       - name: Checkout code
