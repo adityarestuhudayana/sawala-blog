@@ -68,6 +68,15 @@ export const getMyPosts = async (req: UserRequest, res: Response) => {
           select: {
             id: true,
             name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        favouritedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
             profilePicture: true,
           },
         },
@@ -150,6 +159,14 @@ export const getNewest = async (req: UserRequest, res: Response) => {
       take: 5,
       include: {
         author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        favouritedBy: {
           select: {
             id: true,
             name: true,
@@ -384,6 +401,15 @@ export const searchPosts = async (req: UserRequest, res: Response) => {
           select: {
             id: true,
             name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        favouritedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
             profilePicture: true,
           },
         },
@@ -419,6 +445,14 @@ export const getPopular = async (req: UserRequest, res: Response) => {
       ],
       include: {
         author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        favouritedBy: {
           select: {
             id: true,
             name: true,
@@ -507,6 +541,14 @@ export const updatePost = async (req: UserRequest, res: Response) => {
       },
       include: {
         author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        favouritedBy: {
           select: {
             id: true,
             name: true,
